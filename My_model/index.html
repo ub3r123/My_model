@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DAG Genesis Rotation Simulator</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>DAG Genesis Rotation</h1>
+        <p>локальные DAG узлов, gossip, validation blocks, PoS и сворачивание эпох</p>
+      </div>
+      <div class="actions">
+        <button id="startBtn">Старт</button>
+        <button id="pauseBtn">Пауза</button>
+        <button id="stepBtn">Шаг слот</button>
+        <button id="resetBtn">Сброс</button>
+        <button id="chartsBtn" disabled>Создать PNG</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel settings">
+        <h2>Параметры</h2>
+        <label>N узлов <input id="nodeCount" type="number" min="10" max="300" value="100" /></label>
+        <label>Валидаторов <input id="validatorCount" type="number" min="3" max="50" value="16" /></label>
+        <label>Tx за слот <input id="txPerSlot" type="number" min="1" max="80" value="8" /></label>
+        <label>Слот, сек <input id="slotDuration" type="number" min="0.5" max="20" step="0.5" value="4" /></label>
+        <label>VB delay, сек <input id="validationDelay" type="number" min="0" max="10" step="0.1" value="1.2" /></label>
+        <label>Лаг финализации <input id="finalityLag" type="number" min="1" max="10" value="3" /></label>
+        <label>Слотов в эпохе <input id="slotsPerEpoch" type="number" min="3" max="100" value="24" /></label>
+        <label>VB / валидатор / слот <input id="vbPerSlot" type="number" min="1" max="5" value="1" /></label>
+        <label>Tx на графе <input id="maxDrawTx" type="number" min="20" max="500" value="140" /></label>
+        <label>VB на графе <input id="maxDrawVb" type="number" min="0" max="200" value="30" /></label>
+        <div class="preset-box">
+          <h2>N=100 presets</h2>
+          <div class="preset-grid">
+            <button id="presetLowBtn" type="button">Low</button>
+            <button id="presetMediumBtn" type="button">Medium</button>
+            <button id="presetHighBtn" type="button">High</button>
+            <button id="presetStressBtn" type="button">Stress</button>
+          </div>
+          <div id="presetText" class="preset-text">Medium: 8 tx / 4s = 2 tx/s</div>
+        </div>
+        <div class="attack-box">
+          <h2>Атаки</h2>
+          <label>U атакующих <input id="attackNodeCount" type="number" min="0" max="50" value="5" /></label>
+          <label>Конфликтов (слот/волна) <input id="conflictCount" type="number" min="1" max="50" value="3" /></label>
+          <label class="attack-mode-row">Режим атаки
+            <select id="attackMode">
+              <option value="single">один input эпохи</option>
+              <option value="multi">разные inputs по слотам</option>
+              <option value="waves">волны: начало, середина, конец</option>
+            </select>
+          </label>
+          <label class="check-row"><input id="autoEpochAttack" type="checkbox" /> Авто-атака эпохи</label>
+          <button id="conflictBtn" type="button">Запустить спам</button>
+          <div id="attackText" class="attack-text"></div>
+        </div>
+      </section>
+
+      <section class="panel metrics">
+        <div class="metric-line">
+          <span>slot</span><strong id="slotText">0</strong>
+          <span>epoch</span><strong id="epochText">0</strong>
+          <span>genesis</span><strong id="genesisText">G0</strong>
+        </div>
+        <div class="bars">
+          <div><span>принятые</span><div class="bar"><i id="acceptedBar"></i></div><b id="acceptedText">0%</b></div>
+          <div><span>отвергнутые</span><div class="bar"><i id="rejectedBar"></i></div><b id="rejectedText">0%</b></div>
+          <div><span>ожидают</span><div class="bar"><i id="pendingBar"></i></div><b id="pendingText">0%</b></div>
+        </div>
+        <div class="small-grid">
+          <span>tx</span><b id="txCountText">0</b>
+          <span>late local observations</span><b id="lateText">0</b>
+          <span>validation blocks</span><b id="vbText">0</b>
+          <span>rotations</span><b id="rotationText">0</b>
+          <span>conflict lost</span><b id="conflictText">0</b>
+          <span>attack nodes</span><b id="attackNodeText">0</b>
+          <span>active attacks</span><b id="activeAttackText">0</b>
+        </div>
+        <div id="chartExportText" class="chart-export-text"></div>
+        <div id="logText" class="chart-export-text"></div>
+      </section>
+
+      <section class="panel graph-panel">
+        <div class="graph-head">
+          <h2>DAG</h2>
+          <div class="graph-controls">
+            <label>Эпоха
+              <select id="epochSelect">
+                <option value="current">текущая</option>
+                <option value="all">все</option>
+              </select>
+            </label>
+            <label>Вид
+              <select id="viewSelect">
+                <option value="aggregate">aggregate</option>
+              </select>
+            </label>
+            <label>VB
+              <select id="vbDisplay">
+                <option value="compact">compact</option>
+                <option value="hidden">hidden</option>
+                <option value="full">full</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <canvas id="dagCanvas" width="1200" height="720"></canvas>
+      </section>
+
+      <section class="panel details">
+        <h2>Транзакция</h2>
+        <pre id="selectedText">Выбери вершину на графе.</pre>
+        <h2>Последние validation blocks</h2>
+        <div id="vbList" class="vb-list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/ui/app.js"></script>
+  </body>
+</html>

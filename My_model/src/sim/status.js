@@ -1,0 +1,22 @@
+export const TxStatus = {
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  REJECTED: "REJECTED",
+  CONFLICT_LOST: "ACCEPTED_CONFLICT_LOST",
+};
+
+export const LocalTxStatus = {
+  UNKNOWN: "UNKNOWN",
+  ON_TIME: "PENDING_ON_TIME",
+  LATE: "LATE_PENDING",
+  FINALIZED: "FINALIZED_KNOWN",
+};
+
+export const MessageType = {
+  TX_FULL: "TX_FULL",
+  IHAVE: "IHAVE",
+  IWANT: "IWANT",
+  VB_FULL: "VB_FULL",
+  VB_IHAVE: "VB_IHAVE",
+  VB_IWANT: "VB_IWANT",
+};
