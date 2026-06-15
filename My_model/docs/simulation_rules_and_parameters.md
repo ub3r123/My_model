@@ -706,8 +706,3 @@ validatorBlockMissChance = clamp(0.055 + statisticalSlack + 0.45 * load, 0.08, 0
 5. libp2p GossipSub v1.1 specification: mesh gossip, `IHAVE`, `IWANT`: https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md
 6. Internet latency and fiber infrastructure route inflation: https://arxiv.org/abs/1811.10737
 
-## 13. Формулировка для защиты
-
-Для защиты можно сказать так:
-
-> В работе моделируется не production throughput IOTA, а лабораторный IOTA-like DAG-протокол с локальными DAG у узлов, gossip-распространением и PoS-финализацией через validation blocks. Архитектурные принципы взяты из материалов IOTA 2.0 и libp2p GossipSub. Интенсивности `0.5`, `2` и `5 tx/sec` выбраны как уровни экспериментальной нагрузки для сети `N = 100`: low, medium и high. Средний режим `2 tx/sec` получается из `8 tx` за слот длительностью `4 sec` и используется как базовая точка сравнения поведения без атаки и при conflict spam.
